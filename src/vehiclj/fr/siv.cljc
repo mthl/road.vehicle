@@ -5,7 +5,8 @@
   <https://www.legifrance.gouv.fr/jorf/article_jo/JORFARTI000032675226>"
   (:require
    [clojure.spec.alpha :as s]
-   [clojure.spec.gen.alpha :as gen]))
+   [clojure.spec.gen.alpha :as gen]
+   [clojure.string :as str]))
 
 (s/def ::genre
   ;; The valid abbreviations of “genre national” which is a french specific
@@ -271,3 +272,30 @@
    "VOIRIE" "Voirie"
    "AGRICOLE" "Agricole"
    "DERIV_VP" "Fourgonnette dérivée de VP"})
+
+(defn cnit-1996?
+  "Check if identifier is a valid “Code National d'Identification du
+  Type” (CNIT) ?"
+  [id]
+  (and (string? id)
+       (= (count id) 12)))
+
+(defn cnit-2009?
+  "Check if identifier is a valid “Code National d'Identification du
+  Type” (CNIT) ?"
+  [id]
+  (and (string? id)
+       (= (count id) 15)))
+
+(defn cnit?
+  "Check if identifier is a valid “Code National d'Identification du
+  Type” (CNIT) ?"
+  [id]
+  (or (cnit-2009? id)
+      (cnit-1996? id)))
+
+(s/def ::cnit
+  ;; “Code National d'Identification du Type”
+  (s/with-gen cnit?
+    #(gen/fmap str/join
+               (gen/vector (gen/char-alphanumeric) 15))))

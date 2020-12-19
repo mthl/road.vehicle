@@ -9,6 +9,7 @@
   (testing "generation of values conforming to data specs."
     (are [spec] (= 10 (count (gen/sample (s/gen spec) 10)))
       ::sut/carrosserie
+      ::sut/cnit
       ::sut/genre)))
 
 (deftest genres-test
