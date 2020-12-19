@@ -7,5 +7,6 @@
   [["releases" {:url "https://repo.clojars.org" :creds :gpg}]
    ["snapshots" {:url "https://repo.clojars.org" :creds :gpg}]]
   :profiles
-  {:dev {:dependencies [[org.clojure/clojure "1.10.1"]]}}
+  {:dev {:dependencies [[org.clojure/clojure "1.10.1"]
+                        [org.clojure/test.check "1.1.0"]]}}
   :repl-options {:init-ns vehiclj.fr.siv})

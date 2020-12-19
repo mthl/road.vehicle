@@ -2,8 +2,14 @@
   (:require
    [clojure.spec.alpha :as s]
    [clojure.spec.gen.alpha :as gen]
-   [clojure.test :refer [deftest testing is]]
+   [clojure.test :refer [are deftest is testing]]
    [vehiclj.fr.siv :as sut]))
+
+(deftest data-spec-generators
+  (testing "generation of values conforming to data specs."
+    (are [spec] (= 10 (count (gen/sample (s/gen spec) 10)))
+      ::sut/carrosserie
+      ::sut/genre)))
 
 (deftest genres-test
   (testing "consistency and completeness of genres specification"
