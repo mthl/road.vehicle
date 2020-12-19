@@ -2,9 +2,9 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/fr.reuz/vehiclj.svg)](https://clojars.org/fr.reuz/vehiclj)
 
-A Clojure library related to vehicule identification and registration.
+A Clojure library related to vehicle identification and registration.
 
-This allows manipulating vehicule registration records and reasoning
+This allows manipulating vehicle registration records and reasoning
 over various vehicle types.
 
 ## License
