@@ -1,9 +1,9 @@
-(ns vehiclj.fr.siv-test
+(ns vehiclj.fr-test
   (:require
    [clojure.spec.alpha :as s]
    [clojure.spec.gen.alpha :as gen]
    [clojure.test :refer [are deftest is testing]]
-   [vehiclj.fr.siv :as sut]))
+   [vehiclj.fr :as sut]))
 
 (deftest data-spec-generators
   (testing "generation of values conforming to data specs."

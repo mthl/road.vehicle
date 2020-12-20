@@ -1,4 +1,4 @@
-(ns vehiclj.fr.siv
+(ns vehiclj.fr
   "French specific vehicle identification.
 
   French specific vehicle types are described in the following link:
