@@ -9,4 +9,4 @@
   :profiles
   {:dev {:dependencies [[org.clojure/clojure "1.10.1"]
                         [org.clojure/test.check "1.1.0"]]}}
-  :repl-options {:init-ns vehiclj.fr.siv})
+  :repl-options {:init-ns vehiclj.core})
