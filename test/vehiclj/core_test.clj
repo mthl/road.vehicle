@@ -37,7 +37,7 @@
         "AXX" "Africa"
         "DXX" nil)))
 
-  (testing "vin decording"
+  (testing "vin decoding"
     (let [vds (a :iso-3779/vds)
           vis (a :iso-3779/vin)]
       (are [vin reg] (= reg (find (sut/decode-vin vin)
