@@ -12,10 +12,12 @@
       :iso-3779/wmi
       :iso-3779/vds
       :iso-3779/vis
-      :iso-3779/vin)))
+      :iso-3779/vin
+      :vehiclj/region)))
 
 (def fn-specs
-  `[sut/decode-vin])
+  `[sut/decode-vin
+    sut/region])
 
 (deftest check-fns
   (testing "function specs conformance"
@@ -23,3 +25,20 @@
             :check-passed (count fn-specs)}
            (stest/summarize-results
             (stest/check fn-specs))))))
+
+(def ^:private a (comp gen/generate s/gen))
+
+(deftest region-test
+  (testing "region retrieval"
+    (let [vds (a :iso-3779/vds)
+          vis (a :iso-3779/vin)]
+      (are [wmi r] (= r (sut/region (str wmi vds vis)))
+        "AXX" "Africa"
+        "DXX" nil)))
+
+  (testing "vin decording"
+    (let [vds (a :iso-3779/vds)
+          vis (a :iso-3779/vin)]
+      (are [vin reg] (= reg (find (sut/decode-vin vin) :vehiclj/region))
+        (str "AXX" vds vis) [:vehiclj/region "Africa"]
+        (str "DXX" vds vis) nil))))

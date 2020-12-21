@@ -60,9 +60,34 @@
   ;; manufacturer to identify each individual vehicle.
   (fixed-length-upper-string 8))
 
+(def ^:private regions
+  {"Africa" #{\A \B \C}
+   "Asia" (char-set \J \R)
+   "Europe" (char-set \S \Z)
+   "North America" (char-set \1 \5)
+   "Oceania" #{\6 \7}
+   "South America" #{\8 \9}})
+
+(s/def :vehiclj/region
+  #{"Africa" "Asia" "Europe" "North America" "Oceania" "South America"})
+
+(s/fdef region
+  :args (s/cat :wmi :iso-3779/wmi)
+  :ret (s/nilable :vehiclj/region))
+
+(def ^{:arglists '([wmi])} region
+  "Find the region name associated with a World Manufacturer
+  Identifier (WMI)."
+  (let [lookup (reduce-kv (fn [acc reg cs]
+                            (into acc (map #(vector % reg)) cs))
+                          {}
+                          regions)]
+    (comp lookup first)))
+
 (s/def :vehiclj/vehicle
   (s/and
-   (s/keys :req [:iso-3779/vin :iso-3779/wmi :iso-3779/vds :iso-3779/vis])
+   (s/keys :req [:iso-3779/vin :iso-3779/wmi :iso-3779/vds :iso-3779/vis]
+           :opt [:vehiclj/region])
    #(= (:iso-3779/vin %)
        (str (:iso-3779/wmi %) (:iso-3779/vds %) (:iso-3779/vis %)))))
 
@@ -77,8 +102,10 @@
   [vin]
   (let [wmi (subs vin 0 3)
         vds (subs vin 3 9)
-        vis (subs vin 9 17)]
-    {:iso-3779/vin vin
-     :iso-3779/wmi wmi
-     :iso-3779/vds vds
-     :iso-3779/vis vis}))
+        vis (subs vin 9 17)
+        region (region wmi)]
+    (cond-> {:iso-3779/vin vin
+             :iso-3779/wmi wmi
+             :iso-3779/vds vds
+             :iso-3779/vis vis}
+      region (assoc :vehiclj/region region))))
