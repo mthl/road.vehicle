@@ -13,7 +13,8 @@
       :iso-3779/vds
       :iso-3779/vis
       :iso-3779/vin
-      :vehiclj/region)))
+      :vehiclj/region
+      :vehiclj/vehicle)))
 
 (def fn-specs
   `[sut/decode-vin

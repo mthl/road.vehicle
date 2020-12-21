@@ -84,18 +84,6 @@
                           regions)]
     (comp lookup first)))
 
-(s/def :vehiclj/vehicle
-  (s/and
-   (s/keys :req [:iso-3779/vin :iso-3779/wmi :iso-3779/vds :iso-3779/vis]
-           :opt [:vehiclj/region])
-   #(= (:iso-3779/vin %)
-       (str (:iso-3779/wmi %) (:iso-3779/vds %) (:iso-3779/vis %)))))
-
-(s/fdef decode-vin
-  :args (s/cat :vin :iso-3779/vin)
-  :ret :vehiclj/vehicle
-  :fn (s/and #(= (-> % :ret :iso-3779/vin) (-> % :args :vin))))
-
 (defn decode-vin
   "Decode a valid Vehicule Identification Number (VIN) into a vehicle
   data map."
@@ -109,3 +97,17 @@
              :iso-3779/vds vds
              :iso-3779/vis vis}
       region (assoc :vehiclj/region region))))
+
+(s/def :vehiclj/vehicle
+  (s/with-gen
+    (s/and
+     (s/keys :req [:iso-3779/vin :iso-3779/wmi :iso-3779/vds :iso-3779/vis]
+             :opt [:vehiclj/region])
+     #(= (:iso-3779/vin %)
+         (str (:iso-3779/wmi %) (:iso-3779/vds %) (:iso-3779/vis %))))
+    #(gen/fmap decode-vin (s/gen :iso-3779/vin))))
+
+(s/fdef decode-vin
+  :args (s/cat :vin :iso-3779/vin)
+  :ret :vehiclj/vehicle
+  :fn (s/and #(= (-> % :ret :iso-3779/vin) (-> % :args :vin))))
