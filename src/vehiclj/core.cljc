@@ -10,6 +10,19 @@
    [clojure.spec.gen.alpha :as gen]
    [clojure.string :as str]))
 
+(defn- char-set
+  "Construct a set of all the characters contained in the ASCII table
+  between `from` and `to`.
+
+  The result contains both `from` and `to` characters."
+  [from to]
+  (let [codes (range (int from) (-> to int inc))]
+    (into #{} (map char) codes)))
+
+(def ^:private vin-chars
+  (into (disj (char-set \A \Z) \I \O \Q)
+        (char-set \0 \9)))
+
 (def ^:private upper-join
   (comp str/upper-case str/join))
 
@@ -19,9 +32,9 @@
   ;; Use a macro instead of a function to include the actual `n` value
   ;; when invoking `clojure.spec/describe` on the specs.
   [n]
-  (let [rgx (re-pattern (format "[A-Z0-9]{%d}" n))]
+  (let [rgx (re-pattern (format "[A-Z0-9&&[^IOQ]]{%d}" n))]
     `(s/with-gen (s/and string? #(re-matches ~rgx %))
-       #(->> (gen/vector (gen/char-alphanumeric) ~n)
+       #(->> (gen/vector (gen/elements vin-chars) ~n)
              (gen/fmap upper-join)))))
 
 (s/def :iso-3779/vin
