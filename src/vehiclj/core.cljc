@@ -19,7 +19,11 @@
   (let [codes (range (int from) (-> to int inc))]
     (into #{} (map char) codes)))
 
-(def ^:private vin-chars
+(def vin-chars
+  "The set of valid characters composing VIN identifiers.
+
+  All alphabetic characters and numbers are valid with the exceptions
+  of 'I', 'O' and 'Q' which could be confused with '0' and '1'."
   (into (disj (char-set \A \Z) \I \O \Q)
         (char-set \0 \9)))
 
