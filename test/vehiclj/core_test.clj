@@ -13,8 +13,8 @@
       :iso-3779/vds
       :iso-3779/vis
       :iso-3779/vin
-      :vehiclj/region
-      :vehiclj/vehicle)))
+      :vehiclj/vehicle
+      :vehiclj.manufacturer/region)))
 
 (def fn-specs
   `[sut/decode-vin
@@ -40,6 +40,7 @@
   (testing "vin decording"
     (let [vds (a :iso-3779/vds)
           vis (a :iso-3779/vin)]
-      (are [vin reg] (= reg (find (sut/decode-vin vin) :vehiclj/region))
-        (str "AXX" vds vis) [:vehiclj/region "Africa"]
+      (are [vin reg] (= reg (find (sut/decode-vin vin)
+                                  :vehiclj.manufacturer/region))
+        (str "AXX" vds vis) [:vehiclj.manufacturer/region "Africa"]
         (str "DXX" vds vis) nil))))

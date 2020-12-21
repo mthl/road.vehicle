@@ -68,12 +68,12 @@
    "Oceania" #{\6 \7}
    "South America" #{\8 \9}})
 
-(s/def :vehiclj/region
+(s/def :vehiclj.manufacturer/region
   #{"Africa" "Asia" "Europe" "North America" "Oceania" "South America"})
 
 (s/fdef region
   :args (s/cat :wmi :iso-3779/wmi)
-  :ret (s/nilable :vehiclj/region))
+  :ret (s/nilable :vehiclj.manufacturer/region))
 
 (def ^{:arglists '([wmi])} region
   "Find the region name associated with a World Manufacturer
@@ -96,13 +96,13 @@
              :iso-3779/wmi wmi
              :iso-3779/vds vds
              :iso-3779/vis vis}
-      region (assoc :vehiclj/region region))))
+      region (assoc :vehiclj.manufacturer/region region))))
 
 (s/def :vehiclj/vehicle
   (s/with-gen
     (s/and
      (s/keys :req [:iso-3779/vin :iso-3779/wmi :iso-3779/vds :iso-3779/vis]
-             :opt [:vehiclj/region])
+             :opt [:vehiclj.manufacturer/region])
      #(= (:iso-3779/vin %)
          (str (:iso-3779/wmi %) (:iso-3779/vds %) (:iso-3779/vis %))))
     #(gen/fmap decode-vin (s/gen :iso-3779/vin))))
