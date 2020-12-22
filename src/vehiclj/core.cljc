@@ -71,10 +71,10 @@
   (fixed-length-upper-string 8))
 
 (def ^:private regions
-  {"Africa" [\A \B \C]
-   "Asia" (char-range \J \R)
-   "Europe" (char-range \S \Z)
-   "North America" (char-range \1 \5)
+  {"Africa" [\A \C]
+   "Asia" [\J \R]
+   "Europe" [\S \Z]
+   "North America" [\1 \5]
    "Oceania" [\6 \7]
    "South America" [\8 \9]})
 
@@ -88,8 +88,10 @@
 (def ^{:arglists '([wmi])} region
   "Find the region name associated with a World Manufacturer
   Identifier (WMI)."
-  (let [lookup (reduce-kv (fn [acc reg cs]
-                            (into acc (map #(vector % reg)) cs))
+  (let [lookup (reduce-kv (fn [acc reg [begin end]]
+                            (into acc
+                                  (map #(vector % reg))
+                                  (char-range begin end)))
                           {}
                           regions)]
     (comp lookup first)))
