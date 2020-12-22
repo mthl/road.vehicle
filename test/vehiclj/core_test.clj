@@ -35,7 +35,10 @@
           vis (a :iso-3779/vin)]
       (are [wmi r] (= r (sut/region (str wmi vds vis)))
         "AXX" "Africa"
-        "DXX" nil)))
+        "DXX" nil
+        "OXX" nil
+        "IXX" nil
+        "QXX" nil)))
 
   (testing "vin decoding"
     (let [vds (a :iso-3779/vds)

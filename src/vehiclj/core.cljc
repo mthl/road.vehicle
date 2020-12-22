@@ -10,22 +10,32 @@
    [clojure.spec.gen.alpha :as gen]
    [clojure.string :as str]))
 
-(defn- char-set
-  "Construct a set of all the characters contained in the ASCII table
-  between `from` and `to`.
+(def vin-alphas
+  "All valid VIN characters.
 
-  The result contains both `from` and `to` characters."
-  [from to]
-  (let [codes (range (int from) (-> to int inc))]
-    (into #{} (map char) codes)))
+  This includes every ASCII alphabetic character except 'I', 'O' and
+  'Q' which could be confused with '0' and '1'."
+  [\A \B \C \D \E \F \G \H \J \K \L \M \N \P \R \S \T \U \V \W \X \Y \Z])
+
+(def vin-nums
+  "All valid VIN numbers.
+
+  This includes all single digit numbers starting from 1 and ending
+  with 0."
+  [\1 \2 \3 \4 \5 \6 \7 \8 \9 \0])
 
 (def vin-chars
-  "The set of valid characters composing VIN identifiers.
+  "All valid VIN characters."
+  (into vin-alphas vin-nums))
 
-  All alphabetic characters and numbers are valid with the exceptions
-  of 'I', 'O' and 'Q' which could be confused with '0' and '1'."
-  (into (disj (char-set \A \Z) \I \O \Q)
-        (char-set \0 \9)))
+(def ^:private  char-index
+  (zipmap vin-chars (range)))
+
+(defn- char-range
+  "Returns the [[vin-chars]] from `start` (inclusive) to
+  `end` (inclusive)."
+  [start end]
+  (subvec vin-chars (char-index start) (inc (char-index end))))
 
 (def ^:private upper-join
   (comp str/upper-case str/join))
@@ -61,12 +71,12 @@
   (fixed-length-upper-string 8))
 
 (def ^:private regions
-  {"Africa" #{\A \B \C}
-   "Asia" (char-set \J \R)
-   "Europe" (char-set \S \Z)
-   "North America" (char-set \1 \5)
-   "Oceania" #{\6 \7}
-   "South America" #{\8 \9}})
+  {"Africa" [\A \B \C]
+   "Asia" (char-range \J \R)
+   "Europe" (char-range \S \Z)
+   "North America" (char-range \1 \5)
+   "Oceania" [\6 \7]
+   "South America" [\8 \9]})
 
 (s/def :vehiclj.manufacturer/region
   #{"Africa" "Asia" "Europe" "North America" "Oceania" "South America"})
