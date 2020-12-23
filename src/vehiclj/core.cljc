@@ -28,7 +28,7 @@
   "All valid VIN characters."
   (into vin-alphas vin-nums))
 
-(def ^:private  char-index
+(def ^:private char-index
   (zipmap vin-chars (range)))
 
 (defn- char-range
@@ -78,6 +78,37 @@
    [\6 \7] "Oceania",
    [\8 \9] "South America"})
 
+(s/def ::range
+  (s/and (s/coll-of (set vin-chars) :count 2)
+         #(<= (-> % first char-index)
+              (-> % second char-index))))
+
+(s/def ::range-map
+  (s/and (s/map-of ::range string?)
+         #(let [cs (mapcat (fn [[x y]]
+                             (if (= x y) [x] [x y]))
+                           (keys %))]
+            (and (apply distinct? nil cs)
+                 (= cs (sort-by char-index cs))))))
+
+(s/fdef compile-ranges
+  :args (s/cat :rmap ::range-map)
+  :ret (s/map-of (set vin-chars) string?)
+  :fn (s/and #(= (-> % :args :rmap vals set)
+                 (-> % :ret vals set))
+             #(every? (-> % :ret keys set)
+                      (-> % :args :rmap keys flatten))))
+
+(defn- compile-ranges
+  "Expand char ranges map."
+  [m]
+  (reduce-kv (fn [acc [begin end] label]
+               (into acc
+                     (map #(vector % label))
+                     (char-range begin end)))
+             {}
+             m))
+
 (s/def :vehiclj.manufacturer/region
   #{"Africa" "Asia" "Europe" "North America" "Oceania" "South America"})
 
@@ -88,12 +119,7 @@
 (def ^{:arglists '([wmi])} region
   "Find the region name associated with a World Manufacturer
   Identifier (WMI)."
-  (let [lookup (reduce-kv (fn [acc [begin end] reg]
-                            (into acc
-                                  (map #(vector % reg))
-                                  (char-range begin end)))
-                          {}
-                          regions)]
+  (let [lookup (compile-ranges regions)]
     (comp lookup first)))
 
 (defn decode-vin
