@@ -14,10 +14,12 @@
       :iso-3779/vis
       :iso-3779/vin
       :vehiclj/vehicle
+      :vehiclj.manufacturer/country
       :vehiclj.manufacturer/region)))
 
 (def fn-specs
-  `[sut/decode-vin
+  `[sut/country
+    sut/decode-vin
     sut/region])
 
 (deftest check-fns
@@ -47,3 +49,24 @@
                                   :vehiclj.manufacturer/region))
         (str "AXX" vds vis) [:vehiclj.manufacturer/region "Africa"]
         (str "DXX" vds vis) nil))))
+
+(deftest country-test
+  (testing "country retrieval"
+    (let [vds (a :iso-3779/vds)
+          vis (a :iso-3779/vin)]
+      (are [wmi r] (= r (sut/country (str wmi vds vis)))
+        "6AX" "Australia"
+        "WAX" "Germany"
+        "B6X" nil
+        "OXX" nil
+        "IXX" nil
+        "QXX" nil)))
+
+  (testing "vin decoding"
+    (let [vds (a :iso-3779/vds)
+          vis (a :iso-3779/vin)]
+      (are [vin reg] (= reg (find (sut/decode-vin vin)
+                                  :vehiclj.manufacturer/country))
+        (str "6AX" vds vis) [:vehiclj.manufacturer/country "Australia"]
+        (str "WAX" vds vis) [:vehiclj.manufacturer/country "Germany"]
+        (str "B6X" vds vis) nil))))
