@@ -331,10 +331,7 @@
         vis (subs vin 9 17)
         region (region wmi)
         country (country wmi)]
-    (cond-> {:iso-3779/vin vin
-             :iso-3779/wmi wmi
-             :iso-3779/vds vds
-             :iso-3779/vis vis}
+    (cond-> #:iso-3779{:vin vin :wmi wmi :vds vds :vis vis}
       region (assoc :vehiclj.manufacturer/region region)
       country (assoc :vehiclj.manufacturer/country country))))
 
