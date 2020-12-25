@@ -322,28 +322,44 @@
           (get (first wmi))
           (get (second wmi))))))
 
+(defn decode-manufacturer
+  "Decode manufacturer information from a vehicle entity."
+  [{:iso-3779/keys [wmi] :as _vehicle}]
+  (let [region (region wmi)
+        country (country wmi)]
+    (cond-> nil
+      region (assoc :vehiclj.manufacturer/region region)
+      country (assoc :vehiclj.manufacturer/country country))))
+
 (defn decode-vin
   "Decode a valid Vehicule Identification Number (VIN) into a vehicle
   data map."
   [vin]
-  (let [wmi (subs vin 0 3)
-        vds (subs vin 3 9)
-        vis (subs vin 9 17)
-        region (region wmi)
-        country (country wmi)]
-    (cond-> #:iso-3779{:vin vin :wmi wmi :vds vds :vis vis}
-      region (assoc :vehiclj.manufacturer/region region)
-      country (assoc :vehiclj.manufacturer/country country))))
+  (let [vehicle #:iso-3779{:vin vin
+                           :wmi (subs vin 0 3)
+                           :vds (subs vin 3 9)
+                           :vis (subs vin 9 17)}
+        manufacturer (decode-manufacturer vehicle)]
+    (if manufacturer
+      (assoc vehicle :vehiclj/manufacturer manufacturer)
+      vehicle)))
+
+(s/def :vehiclj/manufacturer
+  (s/keys :req [:vehiclj.manufacturer/region]
+          :opt [:vehiclj.manufacturer/country]))
 
 (s/def :vehiclj/vehicle
   (s/with-gen
     (s/and
      (s/keys :req [:iso-3779/vin :iso-3779/wmi :iso-3779/vds :iso-3779/vis]
-             :opt [:vehiclj.manufacturer/region
-                   :vehiclj.manufacturer/country])
+             :opt [:vehiclj/manufacturer])
      #(= (:iso-3779/vin %)
          (str (:iso-3779/wmi %) (:iso-3779/vds %) (:iso-3779/vis %))))
     #(gen/fmap decode-vin (s/gen :iso-3779/vin))))
+
+(s/fdef decode-manufacturer
+  :args (s/cat :vehicle :vehiclj/vehicle)
+  :ret (s/nilable :vehiclj/manufacturer))
 
 (s/fdef decode-vin
   :args (s/cat :vin :iso-3779/vin)

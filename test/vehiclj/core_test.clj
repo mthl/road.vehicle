@@ -13,12 +13,14 @@
       :iso-3779/vds
       :iso-3779/vis
       :iso-3779/vin
+      :vehiclj/manufacturer
       :vehiclj/vehicle
       :vehiclj.manufacturer/country
       :vehiclj.manufacturer/region)))
 
 (def fn-specs
   `[sut/country
+    sut/decode-manufacturer
     sut/decode-vin
     sut/region])
 
@@ -40,13 +42,12 @@
       "IXX" nil
       "QXX" nil))
 
-  (testing "vin decoding"
-    (let [vds (a :iso-3779/vds)
-          vis (a :iso-3779/vin)]
-      (are [vin reg] (= reg (find (sut/decode-vin vin)
-                                  :vehiclj.manufacturer/region))
-        (str "AXX" vds vis) [:vehiclj.manufacturer/region "Africa"]
-        (str "DXX" vds vis) nil))))
+  (testing "manufacturer decoding"
+    (are [wmi r]
+        (= r (:vehiclj.manufacturer/region
+              (sut/decode-manufacturer #:iso-3779{:wmi wmi})))
+      "AXX" "Africa"
+      "DXX" nil)))
 
 (deftest country-test
   (testing "country retrieval"
@@ -58,11 +59,10 @@
       "IXX" nil
       "QXX" nil))
 
-  (testing "vin decoding"
-    (let [vds (a :iso-3779/vds)
-          vis (a :iso-3779/vin)]
-      (are [vin reg] (= reg (find (sut/decode-vin vin)
-                                  :vehiclj.manufacturer/country))
-        (str "6AX" vds vis) [:vehiclj.manufacturer/country "Australia"]
-        (str "WAX" vds vis) [:vehiclj.manufacturer/country "Germany"]
-        (str "B6X" vds vis) nil))))
+  (testing "manufacturer decoding"
+    (are [wmi reg]
+        (= reg (:vehiclj.manufacturer/country
+                (sut/decode-manufacturer {:iso-3779/wmi wmi})))
+      "6AX" "Australia"
+      "WAX" "Germany"
+      "B6X" nil)))
