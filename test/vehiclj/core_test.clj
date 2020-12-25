@@ -33,14 +33,12 @@
 
 (deftest region-test
   (testing "region retrieval"
-    (let [vds (a :iso-3779/vds)
-          vis (a :iso-3779/vin)]
-      (are [wmi r] (= r (sut/region (str wmi vds vis)))
-        "AXX" "Africa"
-        "DXX" nil
-        "OXX" nil
-        "IXX" nil
-        "QXX" nil)))
+    (are [wmi r] (= r (sut/region wmi))
+      "AXX" "Africa"
+      "DXX" nil
+      "OXX" nil
+      "IXX" nil
+      "QXX" nil))
 
   (testing "vin decoding"
     (let [vds (a :iso-3779/vds)
@@ -52,15 +50,13 @@
 
 (deftest country-test
   (testing "country retrieval"
-    (let [vds (a :iso-3779/vds)
-          vis (a :iso-3779/vin)]
-      (are [wmi r] (= r (sut/country (str wmi vds vis)))
-        "6AX" "Australia"
-        "WAX" "Germany"
-        "B6X" nil
-        "OXX" nil
-        "IXX" nil
-        "QXX" nil)))
+    (are [wmi r] (= r (sut/country wmi))
+      "6AX" "Australia"
+      "WAX" "Germany"
+      "B6X" nil
+      "OXX" nil
+      "IXX" nil
+      "QXX" nil))
 
   (testing "vin decoding"
     (let [vds (a :iso-3779/vds)
