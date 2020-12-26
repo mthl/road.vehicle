@@ -16,6 +16,7 @@
       :vehiclj/manufacturer
       :vehiclj/vehicle
       :vehiclj.manufacturer/country
+      :vehiclj.manufacturer/id
       :vehiclj.manufacturer/region)))
 
 (def fn-specs
@@ -66,3 +67,11 @@
       "6AX" "Australia"
       "WAX" "Germany"
       "B6X" nil)))
+
+(deftest manufacturer-id-test
+  (are [vin id]
+      (= id (:vehiclj.manufacturer/id
+             (sut/decode-manufacturer
+              #:iso-3779{:vin vin :wmi (subs vin 0 3)})))
+    "XXXYYYYYYZZZZZZZZ" "XXX"
+    "XX9YYYYYYZZABCZZZ" "XX9/ABC"))

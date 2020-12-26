@@ -324,10 +324,11 @@
 
 (defn decode-manufacturer
   "Decode manufacturer information from a vehicle entity."
-  [{:iso-3779/keys [wmi] :as _vehicle}]
+  [{:iso-3779/keys [wmi vin] :as _vehicle}]
   (let [region (region wmi)
         country (country wmi)]
-    (cond-> nil
+    (cond-> {:vehiclj.manufacturer/id
+             (if (= (last wmi) \9) (str wmi "/" (subs vin 11 14)) wmi)}
       region (assoc :vehiclj.manufacturer/region region)
       country (assoc :vehiclj.manufacturer/country country))))
 
@@ -344,9 +345,20 @@
       (assoc vehicle :vehiclj/manufacturer manufacturer)
       vehicle)))
 
+(s/def :vehiclj/small-manufacturer-id
+  (s/with-gen
+    (s/and string? #(re-matches #"[A-Z0-9&&[^IOQ]]{3}/[A-Z0-9&&[^IOQ]]{3}" %))
+    #(->> (gen/vector (gen/elements vin-chars) 7)
+          (gen/fmap (fn [cs] (upper-join (assoc cs 3 \/)))))))
+
+(s/def :vehiclj.manufacturer/id
+  (s/or :big :iso-3779/wmi
+        :small :vehiclj/small-manufacturer-id))
+
 (s/def :vehiclj/manufacturer
-  (s/keys :req [:vehiclj.manufacturer/region]
-          :opt [:vehiclj.manufacturer/country]))
+  (s/keys :req [:vehiclj.manufacturer/id]
+          :opt [:vehiclj.manufacturer/region
+                :vehiclj.manufacturer/country]))
 
 (s/def :vehiclj/vehicle
   (s/with-gen
@@ -359,7 +371,7 @@
 
 (s/fdef decode-manufacturer
   :args (s/cat :vehicle :vehiclj/vehicle)
-  :ret (s/nilable :vehiclj/manufacturer))
+  :ret :vehiclj/manufacturer)
 
 (s/fdef decode-vin
   :args (s/cat :vin :iso-3779/vin)
