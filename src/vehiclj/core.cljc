@@ -40,35 +40,32 @@
 (def ^:private upper-join
   (comp str/upper-case str/join))
 
-(defmacro ^:private fixed-length-upper-string
-  "Return a specification matching fixed length strings containing `n`
-  alpha-numeric characters."
-  ;; Use a macro instead of a function to include the actual `n` value
-  ;; when invoking `clojure.spec/describe` on the specs.
-  [n]
-  (let [rgx (re-pattern (format "[A-Z0-9&&[^IOQ]]{%d}" n))]
-    `(s/with-gen (s/and string? #(re-matches ~rgx %))
-       #(->> (gen/vector (gen/elements vin-chars) ~n)
-             (gen/fmap upper-join)))))
-
 (s/def :iso-3779/vin
   ;; Global unique Vehicle Identification Number (VIN).
-  (fixed-length-upper-string 17))
+  (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{17}" %))
+    #(->> (gen/vector (gen/elements vin-chars) 17)
+          (gen/fmap upper-join))))
 
 (s/def :iso-3779/wmi
   ;; The World Manufacturer Identifier (WMI) attributed by the Society of
   ;; Automotive Engineers (SAE).
-  (fixed-length-upper-string 3))
+  (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{3}" %))
+    #(->> (gen/vector (gen/elements vin-chars) 3)
+          (gen/fmap upper-join))))
 
 (s/def :iso-3779/vds
   ;; The Vehicle Descriptor Section of the VIN identifying the vehicle
   ;; type according to local regulations.
-  (fixed-length-upper-string 6))
+  (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{6}" %))
+    #(->> (gen/vector (gen/elements vin-chars) 6)
+          (gen/fmap upper-join))))
 
 (s/def :iso-3779/vis
   ;; The Vehicle Identifier Section of the VIN used by the
   ;; manufacturer to identify each individual vehicle.
-  (fixed-length-upper-string 8))
+  (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{8}" %))
+    #(->> (gen/vector (gen/elements vin-chars) 8)
+          (gen/fmap upper-join))))
 
 (def ^:private regions
   {[\A \C] "Africa",
@@ -324,7 +321,10 @@
 
 (s/def :vehiclj/small-manufacturer-id
   (s/with-gen
-    (s/and string? #(re-matches #"[A-Z0-9&&[^IOQ]]{3}/[A-Z0-9&&[^IOQ]]{3}" %))
+    (s/and string?
+           #(re-matches
+             #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{3}/[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{3}"
+             %))
     #(->> (gen/vector (gen/elements vin-chars) 7)
           (gen/fmap (fn [cs] (upper-join (assoc cs 3 \/)))))))
 

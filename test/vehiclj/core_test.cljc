@@ -20,19 +20,16 @@
       :vehiclj.manufacturer/name
       :vehiclj.manufacturer/region)))
 
-(def fn-specs
-  `[sut/country
-    sut/decode-manufacturer
-    sut/decode-vin
-    sut/manufacturer
-    sut/region])
-
 (deftest check-fns
   (testing "function specs conformance"
-    (is (= {:total (count fn-specs)
-            :check-passed (count fn-specs)}
+    (is (= {:total 5
+            :check-passed 5}
            (stest/summarize-results
-            (stest/check fn-specs))))))
+            (stest/check `[sut/country
+                           sut/decode-manufacturer
+                           sut/decode-vin
+                           sut/manufacturer
+                           sut/region]))))))
 
 (def ^:private a (comp gen/generate s/gen))
 
