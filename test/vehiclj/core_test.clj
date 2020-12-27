@@ -17,12 +17,14 @@
       :vehiclj/vehicle
       :vehiclj.manufacturer/country
       :vehiclj.manufacturer/id
+      :vehiclj.manufacturer/name
       :vehiclj.manufacturer/region)))
 
 (def fn-specs
   `[sut/country
     sut/decode-manufacturer
     sut/decode-vin
+    sut/manufacturer
     sut/region])
 
 (deftest check-fns
