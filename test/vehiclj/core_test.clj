@@ -77,3 +77,15 @@
               #:iso-3779{:vin vin :wmi (subs vin 0 3)})))
     "XXXYYYYYYZZZZZZZZ" "XXX"
     "XX9YYYYYYZZABCZZZ" "XX9/ABC"))
+
+(deftest mazda-6-test
+  (is (= {:iso-3779/vin "JMZGJ627661337940"
+          :iso-3779/wmi "JMZ"
+          :iso-3779/vds "GJ6276"
+          :iso-3779/vis "61337940"
+          :vehiclj/manufacturer
+          #:vehiclj.manufacturer{:id "JMZ"
+                                 :name "Mazda"
+                                 :country "Japan"
+                                 :region "Asia"}}
+         (sut/decode-vin "JMZGJ627661337940"))))
