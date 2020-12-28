@@ -4,7 +4,9 @@
    [clojure.test.check]
    [clojure.test.check.properties]
    [road.vehicle-test]
-   [road.vehicle.fr-test]))
+   [road.vehicle.fr-test]
+   [road.vehicle.manufacturer-test]))
 
 (doo-tests 'road.vehicle-test
-           'road.vehicle.fr-test)
+           'road.vehicle.fr-test
+           'road.vehicle.manufacturer-test)

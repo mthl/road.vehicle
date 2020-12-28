@@ -14,66 +14,14 @@
       ::rv/vis
       ::rv/vin
       ::rv/manufacturer
-      ::rv/vehicle
-      :road.vehicle.manufacturer/country
-      :road.vehicle.manufacturer/id
-      :road.vehicle.manufacturer/name
-      :road.vehicle.manufacturer/region)))
+      ::rv/vehicle)))
 
 (deftest check-fns
   (testing "function specs conformance"
-    (is (= {:total 5
-            :check-passed 5}
+    (is (= {:total 1
+            :check-passed 1}
            (stest/summarize-results
-            (stest/check `[rv/country
-                           rv/decode-manufacturer
-                           rv/decode-vin
-                           rv/manufacturer
-                           rv/region]))))))
-
-(def ^:private a (comp gen/generate s/gen))
-
-(deftest region-test
-  (testing "region retrieval"
-    (are [wmi r] (= r (rv/region wmi))
-      "AXX" "Africa"
-      "DXX" nil
-      "OXX" nil
-      "IXX" nil
-      "QXX" nil))
-
-  (testing "manufacturer decoding"
-    (are [wmi r]
-        (= r (:road.vehicle.manufacturer/region
-              (rv/decode-manufacturer #::rv{:wmi wmi})))
-      "AXX" "Africa"
-      "DXX" nil)))
-
-(deftest country-test
-  (testing "country retrieval"
-    (are [wmi r] (= r (rv/country wmi))
-      "6AX" "Australia"
-      "WAX" "Germany"
-      "B6X" nil
-      "OXX" nil
-      "IXX" nil
-      "QXX" nil))
-
-  (testing "manufacturer decoding"
-    (are [wmi reg]
-        (= reg (:road.vehicle.manufacturer/country
-                (rv/decode-manufacturer {::rv/wmi wmi})))
-      "6AX" "Australia"
-      "WAX" "Germany"
-      "B6X" nil)))
-
-(deftest manufacturer-id-test
-  (are [vin id]
-      (= id (:road.vehicle.manufacturer/id
-             (rv/decode-manufacturer
-              #::rv{:vin vin :wmi (subs vin 0 3)})))
-    "XXXYYYYYYZZZZZZZZ" "XXX"
-    "XX9YYYYYYZZABCZZZ" "XX9/ABC"))
+            (stest/check `[rv/decode]))))))
 
 (deftest mazda-6-test
   (is (= #::rv{:vin "JMZGJ627661337940"
@@ -85,4 +33,4 @@
                                            :name "Mazda"
                                            :country "Japan"
                                            :region "Asia"}}
-         (rv/decode-vin "JMZGJ627661337940"))))
+         (rv/decode "JMZGJ627661337940"))))
