@@ -1,6 +1,6 @@
-# Vehiclj
+# road.vehicle
 
-[![Clojars Project](https://img.shields.io/clojars/v/fr.reuz/vehiclj.svg)](https://clojars.org/fr.reuz/vehiclj)
+[![Clojars Project](https://img.shields.io/clojars/v/fr.reuz/road.vehicle.svg)](https://clojars.org/fr.reuz/road.vehicle)
 
 A Clojure library related to vehicle identification and registration.
 

@@ -1,4 +1,4 @@
-(ns vehiclj.core
+(ns road.vehicle
   "International vehicle identification properties.
 
   ISO-3779 defines the notion of global Vehicle Identification
@@ -40,27 +40,27 @@
 (def ^:private upper-join
   (comp str/upper-case str/join))
 
-(s/def :iso-3779/vin
+(s/def ::vin
   ;; Global unique Vehicle Identification Number (VIN).
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{17}" %))
     #(->> (gen/vector (gen/elements vin-chars) 17)
           (gen/fmap upper-join))))
 
-(s/def :iso-3779/wmi
+(s/def ::wmi
   ;; The World Manufacturer Identifier (WMI) attributed by the Society of
   ;; Automotive Engineers (SAE).
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{3}" %))
     #(->> (gen/vector (gen/elements vin-chars) 3)
           (gen/fmap upper-join))))
 
-(s/def :iso-3779/vds
+(s/def ::vds
   ;; The Vehicle Descriptor Section of the VIN identifying the vehicle
   ;; type according to local regulations.
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{6}" %))
     #(->> (gen/vector (gen/elements vin-chars) 6)
           (gen/fmap upper-join))))
 
-(s/def :iso-3779/vis
+(s/def ::vis
   ;; The Vehicle Identifier Section of the VIN used by the
   ;; manufacturer to identify each individual vehicle.
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{8}" %))
@@ -106,12 +106,12 @@
              {}
              m))
 
-(s/def :vehiclj.manufacturer/region
+(s/def :road.vehicle.manufacturer/region
   #{"Africa" "Asia" "Europe" "North America" "Oceania" "South America"})
 
 (s/fdef region
-  :args (s/cat :wmi :iso-3779/wmi)
-  :ret (s/nilable :vehiclj.manufacturer/region))
+  :args (s/cat :wmi ::wmi)
+  :ret (s/nilable :road.vehicle.manufacturer/region))
 
 (def ^{:arglists '([wmi])} region
   "Find the region name associated with a World Manufacturer
@@ -215,7 +215,7 @@
        [\X \2] "Trinidad & Tobago"
        [\3 \9] "Brazil"}})
 
-(s/def :vehiclj.manufacturer/country
+(s/def :road.vehicle.manufacturer/country
   #{"Algeria"
     "Angola"
     "Argentina"
@@ -307,8 +307,8 @@
     "Zimbabwe"})
 
 (s/fdef country
-  :args (s/cat :wmi :iso-3779/wmi)
-  :ret (s/nilable :vehiclj.manufacturer/country))
+  :args (s/cat :wmi ::wmi)
+  :ret (s/nilable :road.vehicle.manufacturer/country))
 
 (def ^{:arglists '([wmi])} country
   "Find the country name associated with a World Manufacturer
@@ -319,7 +319,7 @@
           (get (first wmi))
           (get (second wmi))))))
 
-(s/def :vehiclj/small-manufacturer-id
+(s/def ::small-manufacturer-id
   (s/with-gen
     (s/and string?
            #(re-matches
@@ -328,9 +328,9 @@
     #(->> (gen/vector (gen/elements vin-chars) 7)
           (gen/fmap (fn [cs] (upper-join (assoc cs 3 \/)))))))
 
-(s/def :vehiclj.manufacturer/id
-  (s/or :big :iso-3779/wmi
-        :small :vehiclj/small-manufacturer-id))
+(s/def :road.vehicle.manufacturer/id
+  (s/or :big ::wmi
+        :small ::small-manufacturer-id))
 
 (s/fdef ids
   :args (s/cat :prefix string? :chars (s/? ::range))
@@ -346,7 +346,7 @@
         (char-range start end))))
 
 (s/def manufacturers
-  (s/map-of string? (s/coll-of :vehiclj.manufacturer/id)))
+  (s/map-of string? (s/coll-of :road.vehicle.manufacturer/id)))
 
 (def ^:private manufacturers
   "Mapping from manufacturer name to id"
@@ -797,11 +797,11 @@
              {}
              m))
 
-(s/def :vehiclj.manufacturer/name string?)
+(s/def :road.vehicle.manufacturer/name string?)
 
 (s/fdef manufacturer
-  :args (s/cat :id :vehiclj.manufacturer/id)
-  :ret (s/nilable :vehiclj.manufacturer/name))
+  :args (s/cat :id :road.vehicle.manufacturer/id)
+  :ret (s/nilable :road.vehicle.manufacturer/name))
 
 (def ^{:arglists '([id])} manufacturer
   "Return the manufacturer name associated with a manufacturer id."
@@ -809,48 +809,48 @@
 
 (defn decode-manufacturer
   "Decode manufacturer information from a vehicle entity."
-  [{:iso-3779/keys [wmi vin] :as _vehicle}]
+  [{::keys [wmi vin] :as _vehicle}]
   (let [region (region wmi)
         country (country wmi)
         id (if (= (last wmi) \9) (str wmi "/" (subs vin 11 14)) wmi)
         name (manufacturer id)]
-    (cond-> {:vehiclj.manufacturer/id id}
-      region (assoc :vehiclj.manufacturer/region region)
-      country (assoc :vehiclj.manufacturer/country country)
-      name (assoc :vehiclj.manufacturer/name name))))
+    (cond-> {:road.vehicle.manufacturer/id id}
+      region (assoc :road.vehicle.manufacturer/region region)
+      country (assoc :road.vehicle.manufacturer/country country)
+      name (assoc :road.vehicle.manufacturer/name name))))
 
 (defn decode-vin
   "Decode a valid Vehicule Identification Number (VIN) into a vehicle
   data map."
   [vin]
-  (let [vehicle #:iso-3779{:vin vin
-                           :wmi (subs vin 0 3)
-                           :vds (subs vin 3 9)
-                           :vis (subs vin 9 17)}
+  (let [vehicle {::vin vin
+                 ::wmi (subs vin 0 3)
+                 ::vds (subs vin 3 9)
+                 ::vis (subs vin 9 17)}
         manufacturer (decode-manufacturer vehicle)]
     (if manufacturer
-      (assoc vehicle :vehiclj/manufacturer manufacturer)
+      (assoc vehicle ::manufacturer manufacturer)
       vehicle)))
 
-(s/def :vehiclj/manufacturer
-  (s/keys :req [:vehiclj.manufacturer/id]
-          :opt [:vehiclj.manufacturer/region
-                :vehiclj.manufacturer/country]))
+(s/def ::manufacturer
+  (s/keys :req [:road.vehicle.manufacturer/id]
+          :opt [:road.vehicle.manufacturer/region
+                :road.vehicle.manufacturer/country]))
 
-(s/def :vehiclj/vehicle
+(s/def ::vehicle
   (s/with-gen
     (s/and
-     (s/keys :req [:iso-3779/vin :iso-3779/wmi :iso-3779/vds :iso-3779/vis]
-             :opt [:vehiclj/manufacturer])
-     #(= (:iso-3779/vin %)
-         (str (:iso-3779/wmi %) (:iso-3779/vds %) (:iso-3779/vis %))))
-    #(gen/fmap decode-vin (s/gen :iso-3779/vin))))
+     (s/keys :req [::vin ::wmi ::vds ::vis]
+             :opt [::manufacturer])
+     #(= (::vin %)
+         (str (::wmi %) (::vds %) (::vis %))))
+    #(gen/fmap decode-vin (s/gen ::vin))))
 
 (s/fdef decode-manufacturer
-  :args (s/cat :vehicle :vehiclj/vehicle)
-  :ret :vehiclj/manufacturer)
+  :args (s/cat :vehicle ::vehicle)
+  :ret ::manufacturer)
 
 (s/fdef decode-vin
-  :args (s/cat :vin :iso-3779/vin)
-  :ret :vehiclj/vehicle
-  :fn (s/and #(= (-> % :ret :iso-3779/vin) (-> % :args :vin))))
+  :args (s/cat :vin ::vin)
+  :ret ::vehicle
+  :fn (s/and #(= (-> % :ret ::vin) (-> % :args :vin))))
