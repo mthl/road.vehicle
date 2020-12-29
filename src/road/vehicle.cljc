@@ -35,12 +35,42 @@
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{8}" %))
     #(u/vin-str-gen 8)))
 
+(s/def ::model-year
+  ;; The year of the vehicle model
+  (s/int-in 1980 #?(:clj Integer/MAX_VALUE
+                    :cljs Number.MAX_SAFE_INTEGER)))
+
+(defn- max-year []
+  #?(:clj (.getYear (java.time.LocalDate/now))
+     :cljs (.getFullYear (js/Date.))))
+
+(s/fdef model-year
+  :args (s/cat :c (set u/vin-chars) :year ::model-year)
+  :ret (s/nilable ::model-year))
+
+(let [model-years (zipmap (remove #{\0 \U \Z} u/vin-chars) (range))]
+  (defn model-year
+    "Decode the year code `c` present in the 10th character of a VIN.
+
+  Since this encoding is ambiguous and represent a collection of year,
+  we make a contextual guess by adding a `year` parameter. The
+  vehicule model will be in the 30 year period before
+  `year` (inclusive)."
+    ([c]
+     (model-year c (max-year)))
+    ([c year]
+     (when-let [idx (model-years c)]
+       (let [dis (mod year 30)
+             base (if (> idx dis) (- year 30) year)]
+         (+ (max (- base dis) 1980) idx))))))
+
 (declare decode)
 
 (s/def ::vehicle
   (s/with-gen
     (s/and
-     (s/keys :req [::vin ::wmi ::vds ::vis ::manufacturer])
+     (s/keys :req [::vin ::wmi ::vds ::vis ::manufacturer]
+             :opt [::model-year])
      #(= (::vin %)
          (str (::wmi %) (::vds %) (::vis %))))
     #(gen/fmap decode (s/gen ::vin))))
@@ -54,9 +84,11 @@
   "Decode a valid Vehicule Identification Number (VIN) into a vehicle
   data map."
   [vin]
-  (let [wmi (subs vin 0 3)]
-    {::vin vin
-     ::wmi wmi
-     ::vds (subs vin 3 9)
-     ::vis (subs vin 9 17)
-     ::manufacturer (rvm/decode wmi (subs vin 11 14))}))
+  (let [wmi (subs vin 0 3)
+        my (model-year (get vin 9))]
+    (cond-> {::vin vin
+             ::wmi wmi
+             ::vds (subs vin 3 9)
+             ::vis (subs vin 9 17)
+             ::manufacturer (rvm/decode wmi (subs vin 11 14))}
+      my (assoc ::model-year my))))
