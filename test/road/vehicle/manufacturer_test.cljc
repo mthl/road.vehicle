@@ -41,7 +41,7 @@
     "IXX" nil
     "QXX" nil))
 
-(deftest name-tesg
+(deftest name-test
   (are [id n] (= n (rvm/name id))
     "VF1" "Renault"
     "JMZ" "Mazda"
