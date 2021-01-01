@@ -75,6 +75,19 @@
          (str (::wmi %) (::vds %) (::vis %))))
     #(gen/fmap decode (s/gen ::vin))))
 
+(s/fdef decode-vehicle
+  :args (s/cat :v ::vehicle)
+  :ret ::vehicle
+  :fn (s/and #(= (-> % :ret ::vin) (-> % :args :v ::vin))))
+
+(defn- decode-vehicle
+  [v]
+  (let [id (get-in v [::manufacturer ::rvm/id])
+        decode (rvm/decoder id identity)]
+    (decode v)))
+
+(s/def road.vehicle.manufacturer.renault/decode `decode-vehicle)
+
 (s/fdef decode
   :args (s/cat :vin ::vin)
   :ret ::vehicle
@@ -86,9 +99,10 @@
   [vin]
   (let [wmi (subs vin 0 3)
         my (model-year (get vin 9))]
-    (cond-> {::vin vin
-             ::wmi wmi
-             ::vds (subs vin 3 9)
-             ::vis (subs vin 9 17)
-             ::manufacturer (rvm/decode wmi (subs vin 11 14))}
-      my (assoc ::model-year my))))
+    (decode-vehicle
+     (cond-> {::vin vin
+              ::wmi wmi
+              ::vds (subs vin 3 9)
+              ::vis (subs vin 9 17)
+              ::manufacturer (rvm/decode wmi (subs vin 11 14))}
+       my (assoc ::model-year my)))))
