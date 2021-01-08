@@ -6,6 +6,7 @@
    [clojure.test :refer [are deftest is testing]]
    [road.vehicle :as rv]
    [road.vehicle.manufacturer :as manufacturer]
+   [road.vehicle.model :as model]
    [road.vehicle.manufacturer.renault :as renault]))
 
 (deftest data-spec-generators
@@ -41,7 +42,7 @@
                  :wmi "JMZ"
                  :vds "GJ6276"
                  :vis "61337940"
-                 :model-year 2006
+                 :model #::model{:year 2006}
                  :manufacturer #::manufacturer{:id "JMZ"
                                                :name "Mazda"
                                                :country "Japan"
@@ -53,11 +54,11 @@
                  :wmi "VF1"
                  :vds "KG1P5E"
                  :vis "3R488860"
+                 :model #::model{:year 2003}
                  :manufacturer #::manufacturer{:id "VF1"
                                                :region "Europe"
                                                :country "France"
                                                :name "Renault"}
-                 :model-year 2003
                  :plant "Romorantin"
                  :engine-type "Gazole engine"
                  :body-type ::renault/break

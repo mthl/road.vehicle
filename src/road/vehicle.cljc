@@ -10,6 +10,7 @@
    [clojure.spec.gen.alpha :as gen]
    [clojure.string :as str]
    [road.vehicle.manufacturer :as rvm]
+   [road.vehicle.model :as model]
    [road.vehicle.util :as u]))
 
 (s/def ::vin
@@ -35,18 +36,13 @@
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{8}" %))
     #(u/vin-str-gen 8)))
 
-(s/def ::model-year
-  ;; The year of the vehicle model
-  (s/int-in 1980 #?(:clj Integer/MAX_VALUE
-                    :cljs Number.MAX_SAFE_INTEGER)))
-
 (defn- max-year []
   #?(:clj (.getYear (java.time.LocalDate/now))
      :cljs (.getFullYear (js/Date.))))
 
 (s/fdef model-year
-  :args (s/cat :c (set u/vin-chars) :year ::model-year)
-  :ret (s/nilable ::model-year))
+  :args (s/cat :c (set u/vin-chars) :year ::model/year)
+  :ret (s/nilable ::model/year))
 
 (let [model-years (zipmap (remove #{\0 \U \Z} u/vin-chars) (range))]
   (defn model-year
@@ -69,8 +65,7 @@
 (s/def ::vehicle
   (s/with-gen
     (s/and
-     (s/keys :req [::vin ::wmi ::vds ::vis ::manufacturer]
-             :opt [::model-year])
+     (s/keys :req [::vin ::wmi ::vds ::vis ::manufacturer ::model])
      #(= (::vin %)
          (str (::wmi %) (::vds %) (::vis %))))
     #(gen/fmap decode (s/gen ::vin))))
@@ -104,5 +99,6 @@
               ::wmi wmi
               ::vds (subs vin 3 9)
               ::vis (subs vin 9 17)
-              ::manufacturer (rvm/decode wmi (subs vin 11 14))}
-       my (assoc ::model-year my)))))
+              ::manufacturer (rvm/decode wmi (subs vin 11 14))
+              ::model {}}
+       my (assoc-in [::model ::model/year] my)))))
