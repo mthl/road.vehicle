@@ -9,8 +9,7 @@ over various vehicle types.
 
 ## Usage
 
-The main service provided by this project is a [Vehicle Identifier Number (VIN)](https://www.wikipedia.org/wiki/Vehicle_identification_number) decoder which given a 17 characters uniquely identifying a vehicle
-`road.vehicle/decode` will return data about the manufacturer and the vehicle model.
+The main service provided by this project is a [Vehicle Identification Number (VIN)](https://www.wikipedia.org/wiki/Vehicle_identification_number) decoder `road.vehicle/decode` which given a sequence of 17 characters uniquely identifying one specific vehicle, will return various information about that vehicle, its manufacturer and its model.
 
 ```clojure
 (require '[road.vehicle :as vehicle])
