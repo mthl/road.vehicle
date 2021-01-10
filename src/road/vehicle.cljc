@@ -8,7 +8,6 @@
   (:require
    [clojure.spec.alpha :as s]
    [clojure.spec.gen.alpha :as gen]
-   [clojure.string :as str]
    [road.vehicle.manufacturer :as rvm]
    [road.vehicle.model :as model]
    [road.vehicle.util :as u]))
