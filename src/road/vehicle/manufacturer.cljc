@@ -6,7 +6,7 @@
    [clojure.spec.gen.alpha :as gen]
    [clojure.string :as str]
    [road.vehicle.manufacturer.renault :as renault]
-   [road.vehicle.util :as u]))
+   [road.vehicle.util :as util]))
 
 (s/def ::region
   #{"Africa" "Asia" "Europe" "North America" "Oceania" "South America"})
@@ -26,7 +26,7 @@
 (def ^{:arglists '([wmi])} region
   "Find the region name associated with a World Manufacturer
   Identifier (WMI)."
-  (let [lookup (u/compile-ranges regions)]
+  (let [lookup (util/compile-ranges regions)]
     (comp lookup first)))
 
 (s/def ::country
@@ -223,7 +223,8 @@
 (def ^{:arglists '([wmi])} country
   "Find the country name associated with a World Manufacturer
   Identifier (WMI)."
-  (let [lookup (zipmap (keys countries) (map u/compile-ranges (vals countries)))]
+  (let [lookup (zipmap (keys countries)
+                       (map util/compile-ranges (vals countries)))]
     (fn [wmi]
       (-> lookup
           (get (first wmi))
@@ -240,7 +241,7 @@
    (ids prefix [\A \0]))
   ([prefix [start end]]
    (map (partial str prefix)
-        (u/char-range start end))))
+        (util/char-range start end))))
 
 (s/def manufacturers
   (s/map-of `road.vehicle/decode-vehicle
@@ -728,7 +729,7 @@
              #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{3}/[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{3}"
              %))
     #(->> (gen/tuple (s/gen :road.vehicle/wmi)
-                     (u/vin-str-gen 3))
+                     (util/vin-str-gen 3))
           (gen/fmap (partial str/join "/")))))
 
 (s/def ::id
