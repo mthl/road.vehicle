@@ -8,42 +8,42 @@
   (:require
    [clojure.spec.alpha :as s]
    [clojure.spec.gen.alpha :as gen]
-   [road.vehicle.manufacturer :as rvm]
+   [road.vehicle.manufacturer :as manufacturer]
    [road.vehicle.model :as model]
-   [road.vehicle.util :as u]))
+   [road.vehicle.util :as util]))
 
 (s/def ::vin
   ;; Global unique Vehicle Identification Number (VIN).
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{17}" %))
-    #(u/vin-str-gen 17)))
+    #(util/vin-str-gen 17)))
 
 (s/def ::wmi
   ;; The World Manufacturer Identifier (WMI) attributed by the Society of
   ;; Automotive Engineers (SAE).
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{3}" %))
-    #(u/vin-str-gen 3)))
+    #(util/vin-str-gen 3)))
 
 (s/def ::vds
   ;; The Vehicle Descriptor Section of the VIN identifying the vehicle
   ;; type according to local regulations.
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{6}" %))
-    #(u/vin-str-gen 6)))
+    #(util/vin-str-gen 6)))
 
 (s/def ::vis
   ;; The Vehicle Identifier Section of the VIN used by the
   ;; manufacturer to identify each individual vehicle.
   (s/with-gen (s/and string? #(re-matches #"[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{8}" %))
-    #(u/vin-str-gen 8)))
+    #(util/vin-str-gen 8)))
 
 (defn- max-year []
   #?(:clj (.getYear (java.time.LocalDate/now))
      :cljs (.getFullYear (js/Date.))))
 
 (s/fdef model-year
-  :args (s/cat :c (set u/vin-chars) :year ::model/year)
+  :args (s/cat :c (set util/vin-chars) :year ::model/year)
   :ret (s/nilable ::model/year))
 
-(let [model-years (zipmap (remove #{\0 \U \Z} u/vin-chars) (range))]
+(let [model-years (zipmap (remove #{\0 \U \Z} util/vin-chars) (range))]
   (defn model-year
     "Decode the year code `c` present in the 10th character of a VIN.
 
@@ -76,8 +76,8 @@
 
 (defn- decode-vehicle
   [v]
-  (let [id (get-in v [::manufacturer ::rvm/id])
-        decode (rvm/decoder id identity)]
+  (let [id (get-in v [::manufacturer ::manufacturer/id])
+        decode (manufacturer/decoder id identity)]
     (decode v)))
 
 (s/def road.vehicle.manufacturer.renault/decode `decode-vehicle)
@@ -98,6 +98,6 @@
               ::wmi wmi
               ::vds (subs vin 3 9)
               ::vis (subs vin 9 17)
-              ::manufacturer (rvm/decode wmi (subs vin 11 14))
+              ::manufacturer (manufacturer/decode wmi (subs vin 11 14))
               ::model {}}
        my (assoc-in [::model ::model/year] my)))))
