@@ -24,6 +24,11 @@ The main service provided by this project is a [Vehicle Identification Number (V
 ;;              …}
 ```
 
+## Data model
+
+<!-- To edit image replace "https://mermaid.ink/svg/" un the URL with "https://mermaid-js.github.io/mermaid-live-editor/#/edit/" -->
+<img width=300 alt="Data model" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gICAgVmVoaWNsZSAtLT4gTW9kZWwgOiBtb2RlbFxuICAgIFZlaGljbGUgLS0-IE1hbnVmYWN0dXJlciA6IG1hbnVmYWN0dXJlclxuXG4gICAgVmVoaWNsZSA6ICtTdHJpbmcgdmluXG4gICAgVmVoaWNsZSA6ICtTdHJpbmcgd21pXG4gICAgVmVoaWNsZSA6ICtTdHJpbmcgdmRzXG4gICAgVmVoaWNsZSA6ICtTdHJpbmcgdmlzXG4gICAgVmVoaWNsZSA6ICtTdHJpbmcgc2VyaWFsXG5cbiAgICBNb2RlbCA6ICtTdHJpbmcgbmFtZVxuICAgIE1vZGVsIDogK0ludGVnZXIgeWVhclxuXG4gICAgTWFudWZhY3R1cmVyIDogK1N0cmluZyBpZFxuICAgIE1hbnVmYWN0dXJlciA6ICtTdHJpbmcgbmFtZVxuICAgIE1hbnVmYWN0dXJlciA6ICtTdHJpbmcgY291bnRyeVxuICAgIE1hbnVmYWN0dXJlciA6ICtTdHJpbmcgcmVnaW9uXG4gICAgXG4gICAgICAgICAgICAiLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ">
+
 ## License
 
 Copyright © 2020-2021 Mathieu Lirzin
